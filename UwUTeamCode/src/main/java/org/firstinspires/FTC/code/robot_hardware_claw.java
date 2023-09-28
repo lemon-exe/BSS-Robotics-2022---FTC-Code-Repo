@@ -11,28 +11,28 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 
-public class robot_hardware {
+public class robot_hardware_claw {
     HardwareMap hw = null;
-    public DcMotor lf,lr,rr,rf,chainlift, duck, l, r;
-    public Servo claw;
+    public DcMotor lf,lr,rr,rf,chainlift, duck, l, r, fred;
+    public Servo arm1, arm2;
     public WebcamName webcam1;
     public BNO055IMU imu;
     public ColorSensor barbie;
-    
+/*    
     public robot_hardware(){
 
-    }
+    }*/
     public void init(HardwareMap hwMap, Telemetry telemetry){
         hw = hwMap;
         try {
             l = hw.get(DcMotor.class, "l");//ok
-            //lr = hw.get(DcMotor.class, "lr");//ok
-            //rf = hw.get(DcMotor.class, "rf");//ok
             r = hw.get(DcMotor.class, "r");//ok
-            //chainlift = hw.get(DcMotor.class, "chainlift");//ok
             duck = hw.get(DcMotor.class, "duck");//ok
-            claw = hw.get(Servo.class, "claw");//ok
-            webcam1 = hw.get(WebcamName.class, "webcam1");
+            fred = hw.get(DcMotor.class, "fred");
+            
+            arm1 = hw.get(Servo.class, "arm1");
+            arm2 = hw.get(Servo.class, "arm2");
+            //webcam1 = hw.get(WebcamName.class, "webcam1");
             l.setDirection(DcMotorSimple.Direction.REVERSE);
             //r.setDirection(DcMotorSimple.Direction.REVERSE);
             imu = hw.get(BNO055IMU.class, "imu");
@@ -44,7 +44,7 @@ public class robot_hardware {
             parameters.loggingEnabled = false;
             imu.initialize(parameters);
             
-            barbie = hw.get(ColorSensor.class, "barbie");
+            //barbie = hw.get(ColorSensor.class, "barbie");
             
             telemetry.addData("Mode", "calibrating...");
             telemetry.update();
