@@ -71,7 +71,8 @@ public class main_drive extends LinearOpMode {
         
         //for the claw
         double clawPos = 1, lmtClaw = 0.36, armPos = 0, armStep = 0.001;
-        // stateRbump is for ___
+        // stateRbump records whether to toggle lockClaw - true for yes, false for no
+        // The reason is that we don't want lockClaw to flicker back and forth very quickly
         // lockClaw is for locking the claw in one position (controlled by rbump)
         boolean stateRbump = false, lockClaw = false;
         
@@ -133,26 +134,63 @@ public class main_drive extends LinearOpMode {
             
             // All for the claw
             // TODO: make two buttons (trig and bump) useful for closing and opening the claw
-            // With the following code, if rbump is false, stateRbump will switch between false and true rapidly
-            if(stateRbump) {
+            // Current control scheme adds locking mechanism using rbump to toggle lock
+            // If toggling is enabled, check whether to toggle lock
+            // If rbump is pressed, toggle
+            if(stateRbump && rbump) {
+                lockClaw = !lockClaw;
                 stateRbump = false;
-                if(rbump) {
-                    lockClaw = true;
-                } else {
-                    lockClaw = false;
-                }
             }
+            // If rbump is not pressed, enable toggling lock
             if(!rbump && !stateRbump) {
                 stateRbump = true;
             }
-
+            
             if(!lockClaw) {
                 // If rtrig is pressed, (1-lmtClaw) means closed
                 // Otherwise, (1-rtrig) means open
                 clawPos = (rtrig) >= lmtClaw? (1-lmtClaw) : (1-rtrig);
-                robot.arm2.setPosition(clawPos);    
+                robot.arm2.setPosition(clawPos);
             }
+
+            // Alternate controlling schemes
+
+            // Alternate #0
+            // If rbump is pressed, lock the claw
+            // If it's released, unlock
+            // No need for stateRbump
+            //if(rbump) {
+            //    lockClaw = true;
+            //} else {
+            //    lockClaw = false;
+            //}
+
+            // Alternate #1
+            // Use rbump for opening the claw, use rtrig for closing the claw
+            // No need for stateRbump or lockClaw
+            // The buttons toggle the value - no holding necessary
+            //if(rtrig >= lmtClaw) {
+            //    clawPos = 1 - lmtClaw;
+            //} else if(rbump >= lmtClaw) {
+            //    clawPos = lmtClaw;
+            //}
+            //robot.arm2.setPosition(clawPos);
             
+            // Alternate #2
+            // Use rbump for toggling open/close claw
+            // No need for lockClaw
+            // If toggling is enabled, check whether to toggle claw
+            // If rbump is pressed, toggle
+            //if(stateRbump && rbump) {
+            //    clawPos = 1 - clawPos;
+            //    stateRbump = false;
+            //}
+            //// If rbump is not pressed, enable toggling claw
+            //if(!rbump && !stateRbump) {
+            //    stateRbump = true;
+            //}
+            //robot.arm2.setPosition(clawPos);
+
             
             // Controls up and down movement of main arm
             robot.duck.setPower(hatUp? 0.8: (hatDown? -0.8: 0));
