@@ -133,7 +133,6 @@ public class main_drive extends LinearOpMode {
             
             
             // All for the claw
-            // TODO: make two buttons (trig and bump) useful for closing and opening the claw
             // Current control scheme adds locking mechanism using rbump to toggle lock
             // If toggling is enabled, check whether to toggle lock
             // If rbump is pressed, toggle
@@ -198,7 +197,6 @@ public class main_drive extends LinearOpMode {
             robot.fred.setPower(hatRight? -0.4: (hatLeft? 0.4: 0));
             
             
-           
             //movement
             // TODO: make tank drive easier to control (invert or switch a few values) (requires further irl testing bc I forgot how it works)
             if(abutton){
