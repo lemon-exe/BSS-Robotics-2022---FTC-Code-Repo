@@ -107,7 +107,6 @@ public class main_drive extends LinearOpMode {
             boolean hatUp = this.gamepad1.dpad_up;
             boolean hatDown = this.gamepad1.dpad_down;
             // Left and right are for rotating the arm a full 360 degrees
-            // TODO: invert these values for later
             boolean hatLeft = this.gamepad1.dpad_left;
             boolean hatRight = this.gamepad1.dpad_right;
             
@@ -151,7 +150,7 @@ public class main_drive extends LinearOpMode {
             // Controls up and down movement of main arm
             robot.duck.setPower(hatUp? 0.8: (hatDown? -0.8: 0));
             // Controls rotational movement (360 degrees) of main arm
-            robot.fred.setPower(hatRight? 0.4: (hatLeft? -0.4: 0));
+            robot.fred.setPower(hatRight? -0.4: (hatLeft? 0.4: 0));
             
             
            
