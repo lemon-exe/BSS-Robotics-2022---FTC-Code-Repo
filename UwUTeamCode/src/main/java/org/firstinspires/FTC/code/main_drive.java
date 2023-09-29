@@ -71,6 +71,8 @@ public class main_drive extends LinearOpMode {
         
         //for the claw
         double clawPos = 1, lmtClaw = 0.36, armPos = 0, armStep = 0.001;
+        // stateRbump is for ___
+        // lockClaw is for locking the claw in one position (controlled by rbump)
         boolean stateRbump = false, lockClaw = false;
         
         waitForStart();
@@ -96,7 +98,8 @@ public class main_drive extends LinearOpMode {
             float rightsticky = this.gamepad1.right_stick_y;
             
             // left trig and bump is for the arm beyond the elbow
-            // right bump is for claw control, rtrig is not used atm
+            // rtrig is for actually opening or closing the claw
+            // rbump is for locking the claw in a certain position
             float ltrig = this.gamepad1.left_trigger;
             float rtrig = this.gamepad1.right_trigger;
             boolean lbump = this.gamepad1.left_bumper;
@@ -116,7 +119,7 @@ public class main_drive extends LinearOpMode {
             //    robot.arm1.setPosition(armPos);
             //}
             
-            // For the arm beyond the elbow
+            // For the arm beyond the elbow (arm1)
             if(0 <= armPos - armStep && ltrig > 0){
                 armPos -= armStep;
             }else if(0.3 >= armPos + armStep && lbump){
@@ -130,18 +133,22 @@ public class main_drive extends LinearOpMode {
             
             // All for the claw
             // TODO: make two buttons (trig and bump) useful for closing and opening the claw
-            if(stateRbump && rbump) {
-                lockClaw = true;
+            // With the following code, if rbump is false, stateRbump will switch between false and true rapidly
+            if(stateRbump) {
                 stateRbump = false;
-            }else if(stateRbump && !rbump){
-                lockClaw = false;
-                stateRbump = false;
+                if(rbump) {
+                    lockClaw = true;
+                } else {
+                    lockClaw = false;
+                }
             }
-            if(!rbump && !stateRbump){
+            if(!rbump && !stateRbump) {
                 stateRbump = true;
             }
 
-            if(!lockClaw){
+            if(!lockClaw) {
+                // If rtrig is pressed, (1-lmtClaw) means closed
+                // Otherwise, (1-rtrig) means open
                 clawPos = (rtrig) >= lmtClaw? (1-lmtClaw) : (1-rtrig);
                 robot.arm2.setPosition(clawPos);    
             }
