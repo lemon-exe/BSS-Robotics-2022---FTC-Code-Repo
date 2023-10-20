@@ -70,7 +70,10 @@ public class main_drive extends LinearOpMode {
         */
         
         //for the claw
-        double clawPos = 1, lmtClaw = 0.36, armPos = 0, armStep = 0.01;
+        double clawPos = 1, lmtClaw = 0.36, armPos = 0, armStep = 0.001;
+        // stateRbump records whether to toggle lockClaw - true for yes, false for no
+        // The reason is that we don't want lockClaw to flicker back and forth very quickly
+        // lockClaw is for locking the claw in one position (controlled by rbump)
         boolean stateRbump = false, lockClaw = false;
         
         waitForStart();
@@ -89,27 +92,35 @@ public class main_drive extends LinearOpMode {
 
             // drivetrain controls
 
+            // Tank drive - left and right stick x are not used atm
             float leftstickx = this.gamepad1.left_stick_x;
             float leftsticky = this.gamepad1.left_stick_y;
             float rightstickx = this.gamepad1.right_stick_x;
             float rightsticky = this.gamepad1.right_stick_y;
             
+            // left trig and bump is for the arm beyond the elbow
+            // rtrig is for actually opening or closing the claw
+            // rbump is for locking the claw in a certain position
             float ltrig = this.gamepad1.left_trigger;
             float rtrig = this.gamepad1.right_trigger;
             boolean lbump = this.gamepad1.left_bumper;
             boolean rbump = this.gamepad1.right_bumper;
             
+            // Controls the part of the arm that connects to the chassis
+            // Up and down are for up and down movement
             boolean hatUp = this.gamepad1.dpad_up;
             boolean hatDown = this.gamepad1.dpad_down;
+            // Left and right are for rotating the arm a full 360 degrees
             boolean hatLeft = this.gamepad1.dpad_left;
             boolean hatRight = this.gamepad1.dpad_right;
             
-            //For the arm (not hex)
-            if(0 < armPos && 0.3 > armPos){
-                armPos += ltrig == 0? 0: (lbump? 0.02:-0.02);
-                robot.arm1.setPosition(armPos);
-            }
+            //For the arm beyond the elbow (not hex)
+            //if(0 < armPos && 0.3 > armPos){
+            //    armPos += ltrig == 0? 0: (lbump? 0.02:-0.02);
+            //    robot.arm1.setPosition(armPos);
+            //}
             
+            // For the arm beyond the elbow (arm1)
             if(0 <= armPos - armStep && ltrig > 0){
                 armPos -= armStep;
             }else if(0.3 >= armPos + armStep && lbump){
@@ -122,38 +133,78 @@ public class main_drive extends LinearOpMode {
             
             
             // All for the claw
-            
+            // Current control scheme adds locking mechanism using rbump to toggle lock
+            // If toggling is enabled, check whether to toggle lock
+            // If rbump is pressed, toggle
             if(stateRbump && rbump) {
-                lockClaw = true;
-                stateRbump = false;
-            }else if(stateRbump && !rbump){
-                lockClaw = false;
+                lockClaw = !lockClaw;
                 stateRbump = false;
             }
-            if(!rbump && !stateRbump){
+            // If rbump is not pressed, enable toggling lock
+            if(!rbump && !stateRbump) {
                 stateRbump = true;
             }
             
-            
-            if(!lockClaw){
+            if(!lockClaw) {
+                // If rtrig is pressed, (1-lmtClaw) means closed
+                // Otherwise, (1-rtrig) means open
                 clawPos = (rtrig) >= lmtClaw? (1-lmtClaw) : (1-rtrig);
-                robot.arm2.setPosition(clawPos);    
+                robot.arm2.setPosition(clawPos);
             }
+
+            // Alternate controlling schemes
+
+            // Alternate #0
+            // If rbump is pressed, lock the claw
+            // If it's released, unlock
+            // No need for stateRbump
+            //if(rbump) {
+            //    lockClaw = true;
+            //} else {
+            //    lockClaw = false;
+            //}
+
+            // Alternate #1
+            // Use rbump for opening the claw, use rtrig for closing the claw
+            // No need for stateRbump or lockClaw
+            // The buttons toggle the value - no holding necessary
+            //if(rtrig >= lmtClaw) {
+            //    clawPos = 1 - lmtClaw;
+            //} else if(rbump >= lmtClaw) {
+            //    clawPos = lmtClaw;
+            //}
+            //robot.arm2.setPosition(clawPos);
             
+            // Alternate #2
+            // Use rbump for toggling open/close claw
+            // No need for lockClaw
+            // If toggling is enabled, check whether to toggle claw
+            // If rbump is pressed, toggle
+            //if(stateRbump && rbump) {
+            //    clawPos = 1 - clawPos;
+            //    stateRbump = false;
+            //}
+            //// If rbump is not pressed, enable toggling claw
+            //if(!rbump && !stateRbump) {
+            //    stateRbump = true;
+            //}
+            //robot.arm2.setPosition(clawPos);
+
             
-            
+            // Controls up and down movement of main arm
             robot.duck.setPower(hatUp? 0.8: (hatDown? -0.8: 0));
-            robot.fred.setPower(hatRight? 0.4: (hatLeft? -0.4: 0));
+            // Controls rotational movement (360 degrees) of main arm
+            robot.fred.setPower(hatRight? -0.4: (hatLeft? 0.4: 0));
             
             
-           
             //movement
+            // TODO: make tank drive easier to control (invert or switch a few values) (requires further irl testing bc I forgot how it works)
             if(abutton){
                 robot.l.setPower(0.6);
                 robot.r.setPower(0.6);
             }else{
-                robot.l.setPower(0.6*leftsticky);
-                robot.r.setPower(0.6*rightsticky);
+                robot.l.setPower(-0.6*leftsticky);
+                robot.r.setPower(-0.6*rightsticky);
             }
             /*
             if(!bbutton){
@@ -173,16 +224,7 @@ public class main_drive extends LinearOpMode {
                 robot.r.setPower(0);
             }
             */
-            
-            
-            }
-            
-            
-            
-            
-            
-            
-        
+        }
     }
     
     void captureFrameToFile() {
